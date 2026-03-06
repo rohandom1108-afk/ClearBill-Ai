@@ -3,14 +3,11 @@ import pdfplumber
 import pandas as pd
 import re
 
-st.set_page_config(
-    page_title="ClearBill AI",
-    layout="wide"
-)
+st.set_page_config(page_title="ClearBill AI", layout="wide")
 
-# -----------------------------------------------------
+# -----------------------------
 # PROFESSIONAL DASHBOARD STYLE
-# -----------------------------------------------------
+# -----------------------------
 
 st.markdown("""
 <style>
@@ -19,19 +16,30 @@ body {
     background-color:#0E1117;
 }
 
-h1 {
-    color:#FFD700;
-    font-weight:700;
+.block-container {
+    padding-top:2rem;
+}
+
+.header-banner {
+    background: linear-gradient(90deg, #111827, #1F2937);
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid #2d3748;
+}
+
+.header-title {
+    font-size: 36px;
+    font-weight: 700;
+    color: #FFD700;
+}
+
+.header-subtitle {
+    font-size: 16px;
+    color: #9CA3AF;
 }
 
 h2,h3 {
     color:white;
-}
-
-.metric-card {
-    background:#1c1f26;
-    padding:20px;
-    border-radius:12px;
 }
 
 .audit-good {
@@ -49,22 +57,27 @@ h2,h3 {
 </style>
 """, unsafe_allow_html=True)
 
-# -----------------------------------------------------
+# -----------------------------
 # HEADER
-# -----------------------------------------------------
-
-st.title("ClearBill AI")
+# -----------------------------
 
 st.markdown("""
-### Intelligent Invoice Audit System
+<div class="header-banner">
+<div class="header-title">ClearBill AI</div>
+<div class="header-subtitle">
+AI-powered invoice auditing platform that detects overbilling, contract mismatches,
+GST inconsistencies, and financial calculation errors.
+</div>
+</div>
+""", unsafe_allow_html=True)
 
-Detect invoice overbilling by comparing **invoice line items vs contract pricing**,  
-validating **GST compliance**, and detecting **calculation anomalies**.
-""")
+st.divider()
 
-# -----------------------------------------------------
+st.subheader("Upload Documents")
+
+# -----------------------------
 # FILE UPLOAD
-# -----------------------------------------------------
+# -----------------------------
 
 col1, col2 = st.columns(2)
 
@@ -76,9 +89,9 @@ with col2:
 
 run = st.button("Run Audit")
 
-# -----------------------------------------------------
+# -----------------------------
 # PDF TEXT EXTRACTION
-# -----------------------------------------------------
+# -----------------------------
 
 def extract_text(uploaded_file):
 
@@ -95,9 +108,9 @@ def extract_text(uploaded_file):
 
     return text
 
-# -----------------------------------------------------
+# -----------------------------
 # INVOICE PARSER
-# -----------------------------------------------------
+# -----------------------------
 
 def parse_invoice(text):
 
@@ -145,9 +158,9 @@ def parse_invoice(text):
         "line_items": line_items
     }
 
-# -----------------------------------------------------
+# -----------------------------
 # CONTRACT PARSER
-# -----------------------------------------------------
+# -----------------------------
 
 def parse_contract(text):
 
@@ -161,9 +174,9 @@ def parse_contract(text):
 
     return rates
 
-# -----------------------------------------------------
+# -----------------------------
 # AUDIT ENGINE
-# -----------------------------------------------------
+# -----------------------------
 
 def audit(invoice, contract):
 
@@ -182,12 +195,10 @@ def audit(invoice, contract):
 
         contract_rate = contract.get(desc)
 
-        # RATE CHECK
-
+        # Rate Check
         if contract_rate and rate > contract_rate:
 
             overcharge = (rate - contract_rate) * qty
-
             total_overcharge += overcharge
 
             findings.append({
@@ -198,8 +209,7 @@ def audit(invoice, contract):
                 "Impact": overcharge
             })
 
-        # GST CHECK
-
+        # GST Check
         if gst != 18:
 
             gst_errors += 1
@@ -212,8 +222,7 @@ def audit(invoice, contract):
                 "Impact": 0
             })
 
-        # CALCULATION CHECK
-
+        # Calculation Check
         expected_total = round(qty * rate * 1.18)
 
         if expected_total != line_total:
@@ -230,9 +239,9 @@ def audit(invoice, contract):
 
     return findings, total_overcharge, calc_errors, gst_errors
 
-# -----------------------------------------------------
+# -----------------------------
 # MAIN EXECUTION
-# -----------------------------------------------------
+# -----------------------------
 
 if run:
 
