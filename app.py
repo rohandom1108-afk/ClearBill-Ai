@@ -5,35 +5,33 @@ import re
 
 st.set_page_config(
     page_title="ClearBill AI",
-    layout="wide",
-    initial_sidebar_state="collapsed"
+    layout="wide"
 )
 
-# --------------------------------------------------
-# ROYAL PROFESSIONAL STYLING
-# --------------------------------------------------
+# -----------------------------------------------------
+# PROFESSIONAL DASHBOARD STYLE
+# -----------------------------------------------------
 
 st.markdown("""
 <style>
 
-.main {
-    background-color:#0e1117;
+body {
+    background-color:#0E1117;
 }
 
 h1 {
     color:#FFD700;
+    font-weight:700;
 }
 
-h2,h3,h4 {
-    color:#ffffff;
+h2,h3 {
+    color:white;
 }
 
 .metric-card {
-    background: #1c1f26;
+    background:#1c1f26;
     padding:20px;
     border-radius:12px;
-    text-align:center;
-    border:1px solid #2e3138;
 }
 
 .audit-good {
@@ -51,35 +49,36 @@ h2,h3,h4 {
 </style>
 """, unsafe_allow_html=True)
 
-# --------------------------------------------------
+# -----------------------------------------------------
 # HEADER
-# --------------------------------------------------
+# -----------------------------------------------------
 
-st.title("👑 ClearBill AI")
-st.markdown("### Intelligent Invoice Audit System")
+st.title("ClearBill AI")
 
 st.markdown("""
+### Intelligent Invoice Audit System
+
 Detect invoice overbilling by comparing **invoice line items vs contract pricing**,  
 validating **GST compliance**, and detecting **calculation anomalies**.
 """)
 
-# --------------------------------------------------
+# -----------------------------------------------------
 # FILE UPLOAD
-# --------------------------------------------------
+# -----------------------------------------------------
 
 col1, col2 = st.columns(2)
 
 with col1:
-    invoice_file = st.file_uploader("📄 Upload Invoice PDF", type=["pdf"])
+    invoice_file = st.file_uploader("Upload Invoice PDF", type=["pdf"])
 
 with col2:
-    contract_file = st.file_uploader("📑 Upload Contract / Rate Card", type=["pdf"])
+    contract_file = st.file_uploader("Upload Contract / Rate Card PDF", type=["pdf"])
 
-run = st.button("🚀 Run Audit")
+run = st.button("Run Audit")
 
-# --------------------------------------------------
+# -----------------------------------------------------
 # PDF TEXT EXTRACTION
-# --------------------------------------------------
+# -----------------------------------------------------
 
 def extract_text(uploaded_file):
 
@@ -96,9 +95,9 @@ def extract_text(uploaded_file):
 
     return text
 
-# --------------------------------------------------
+# -----------------------------------------------------
 # INVOICE PARSER
-# --------------------------------------------------
+# -----------------------------------------------------
 
 def parse_invoice(text):
 
@@ -130,7 +129,6 @@ def parse_invoice(text):
             rate = int(match.group(3))
 
             gst = 18
-
             total = round(qty * rate * 1.18)
 
             line_items.append({
@@ -147,9 +145,9 @@ def parse_invoice(text):
         "line_items": line_items
     }
 
-# --------------------------------------------------
+# -----------------------------------------------------
 # CONTRACT PARSER
-# --------------------------------------------------
+# -----------------------------------------------------
 
 def parse_contract(text):
 
@@ -163,15 +161,15 @@ def parse_contract(text):
 
     return rates
 
-# --------------------------------------------------
+# -----------------------------------------------------
 # AUDIT ENGINE
-# --------------------------------------------------
+# -----------------------------------------------------
 
 def audit(invoice, contract):
 
     findings = []
     total_overcharge = 0
-    calculation_errors = 0
+    calc_errors = 0
     gst_errors = 0
 
     for item in invoice["line_items"]:
@@ -220,7 +218,7 @@ def audit(invoice, contract):
 
         if expected_total != line_total:
 
-            calculation_errors += 1
+            calc_errors += 1
 
             findings.append({
                 "Issue": "Calculation mismatch",
@@ -230,11 +228,11 @@ def audit(invoice, contract):
                 "Impact": 0
             })
 
-    return findings, total_overcharge, calculation_errors, gst_errors
+    return findings, total_overcharge, calc_errors, gst_errors
 
-# --------------------------------------------------
-# MAIN LOGIC
-# --------------------------------------------------
+# -----------------------------------------------------
+# MAIN EXECUTION
+# -----------------------------------------------------
 
 if run:
 
@@ -254,7 +252,7 @@ if run:
 
         st.divider()
 
-        st.subheader("📊 Executive Dashboard")
+        st.subheader("Executive Dashboard")
 
         col1, col2, col3, col4 = st.columns(4)
 
@@ -277,11 +275,11 @@ if run:
 
         st.divider()
 
-        st.subheader("📦 Invoice Line Items")
+        st.subheader("Invoice Line Items")
 
         st.dataframe(pd.DataFrame(invoice["line_items"]))
 
-        st.subheader("📑 Contract Rates")
+        st.subheader("Contract Rates")
 
         contract_df = pd.DataFrame(
             [{"Charge": k, "Rate": v} for k, v in contract.items()]
@@ -291,7 +289,7 @@ if run:
 
         st.divider()
 
-        st.subheader("🚨 Audit Findings")
+        st.subheader("Audit Findings")
 
         if findings:
 
